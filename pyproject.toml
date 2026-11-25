@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abfarm"
+version = "0.1.0"
+description = "Automated Abliteration account provisioning (clean-room)"
+requires-python = ">=3.10"
+dependencies = ["playwright>=1.40"]
+
+[project.optional-dependencies]
+cloak = ["cloakbrowser>=0.7"]
+camoufox = ["camoufox[geoip]"]
+
+[project.scripts]
+abfarm = "abfarm.cli:main"
+
+[tool.setuptools]
+packages = ["abfarm"]
