@@ -14,7 +14,7 @@ class Config:
 
     base_url: str = DEFAULT_BASE_URL
     proxy: str | None = None
-    browser: str = "cloak"            # cloak | camoufox | chromium
+    browser: str = "camoufox"         # camoufox | cloak | chromium
     headless: bool = True
     humanize: bool = True
     timeout_s: int = 90
@@ -26,6 +26,7 @@ class Config:
     imap_user: str | None = None
     imap_pass: str | None = None
     voidash_domain: str = "voidash.cyou"
+    rotate_cmd: str | None = None     # shell command run between retry attempts
 
     signup_url: str = field(init=False, default="")
     console_url: str = field(init=False, default="")
@@ -40,10 +41,11 @@ class Config:
     def from_env(cls, **overrides) -> "Config":
         cfg = cls(
             proxy=os.environ.get("ABFARM_PROXY") or None,
-            browser=os.environ.get("ABFARM_BROWSER", "cloak"),
+            browser=os.environ.get("ABFARM_BROWSER", "camoufox"),
             mailbox=os.environ.get("ABFARM_MAILBOX", "manual"),
             imap_user=os.environ.get("ABFARM_IMAP_USER"),
             imap_pass=os.environ.get("ABFARM_IMAP_PASS"),
+            rotate_cmd=os.environ.get("ABFARM_ROTATE_CMD") or None,
         )
         for k, v in overrides.items():
             if v is not None:

@@ -18,7 +18,8 @@ def _parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def common(sp: argparse.ArgumentParser) -> None:
-        sp.add_argument("--browser", choices=["cloak", "camoufox", "chromium"], default=None)
+        sp.add_argument("--browser", choices=["camoufox", "cloak", "chromium"], default=None,
+                        help="default: camoufox (or ABFARM_BROWSER)")
         sp.add_argument("--proxy", default=None, help="http://host:port or socks5://host:port")
         sp.add_argument("--headful", action="store_true")
         sp.add_argument("--no-humanize", action="store_true")

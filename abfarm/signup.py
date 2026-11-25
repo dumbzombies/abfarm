@@ -184,7 +184,13 @@ async def run_one(cfg: Config, mailbox: Any, password: str | None = None) -> Acc
                 print(f"  attempt {attempt} failed: {msg}")
                 if msg.startswith("auth_policy_denied"):
                     raise
-                await asyncio.sleep(3)
+                if cfg.rotate_cmd:
+                    import subprocess
+                    print(f"  rotating exit: {cfg.rotate_cmd}")
+                    subprocess.run(cfg.rotate_cmd, shell=True, timeout=120)
+                    await asyncio.sleep(3)
+                else:
+                    await asyncio.sleep(3)
     raise SignupError(f"gave up after 3 attempts: {last}")
 
 

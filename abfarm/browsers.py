@@ -1,9 +1,11 @@
 """Browser backends.
 
-cloak     CloakBrowser Pro (stealth Chromium, licensed). Best Turnstile pass rate.
-camoufox  Camoufox (patched Firefox). Needs GTK shared libs; headless is detected
-          more often by Cloudflare, expect "empty widget" retries.
-chromium  Vanilla Playwright Chromium. Only for debugging markup.
+camoufox  Default. Patched Firefox; pass ``geoip=True`` whenever a proxy is set so
+          timezone/locale match the exit — without it Turnstile serves an empty
+          widget every time. Needs GTK shared libs on bare Linux.
+cloak     CloakBrowser Pro (licensed stealth Chromium). Alternative if Camoufox
+          is unavailable; same flow.
+chromium  Vanilla Playwright Chromium. Debugging only, will not pass Turnstile.
 """
 from __future__ import annotations
 
@@ -41,6 +43,8 @@ class BrowserSession:
             kwargs: dict[str, Any] = {"headless": self.cfg.headless, "i_know_what_im_doing": True}
             if self.cfg.proxy:
                 kwargs["proxy"] = {"server": self.cfg.proxy}
+                # timezone/locale must match the exit or Turnstile flags the session
+                kwargs["geoip"] = True
             cm = AsyncCamoufox(**kwargs)
             browser = await cm.__aenter__()
             self._stack.append(cm)

@@ -19,11 +19,13 @@ email verification code → console → project API key. Results land in
 
 - Python ≥ 3.10 and Playwright
 - One browser backend:
-  - **cloak** (default) — [CloakBrowser](https://cloakbrowser.dev) Pro binary. Best pass rate;
-    handles fingerprinting and humanised input. `pip install cloakbrowser`
-  - **camoufox** — `pip install "camoufox[geoip]"`. Headless Firefox is detected more often;
-    expect widget retries. Needs GTK libraries on Linux.
-  - **chromium** — plain Playwright Chromium, debugging only.
+  - **camoufox** (default) — `pip install "camoufox[geoip]"`. Patched Firefox. When you pass a
+    proxy it must run with `geoip=True` (the code does this automatically) so timezone and
+    locale match the exit IP — without that Turnstile serves an empty widget every time.
+    On bare Linux you may need GTK shared libraries (`libgtk-3-0` and friends).
+  - **cloak** — [CloakBrowser](https://cloakbrowser.dev) Pro binary, `pip install cloakbrowser`.
+    Drop-in alternative; same flow.
+  - **chromium** — plain Playwright Chromium, debugging only; it will not pass Turnstile.
 - A mailbox that isn't flagged as disposable (see below)
 
 ## Install
@@ -75,12 +77,16 @@ It reports one of four states, which map straight onto what to fix:
 | state | meaning | fix |
 |---|---|---|
 | `solved` | token minted | — |
-| `no-token` | widget drew itself but never issued a token | burned exit IP or a detected browser. Rotate the proxy, use `--browser cloak`. |
+| `no-token` | widget drew itself but never issued a token | burned exit IP. Rotate the proxy between attempts: `ABFARM_ROTATE_CMD='mystvpn rotate'` (or any command that gives you a fresh exit). |
 | `empty-widget` | the widget box exists but the challenge iframe never mounted | Turnstile rate limited this session; wait a few minutes and retry. |
 | `missing` | no widget in the DOM | the page changed; run `abfarm doctor`. |
 
-Verified working configuration: CloakBrowser headless + residential exit + humanised typing.
-Camoufox headless produced `empty-widget` on every attempt from the same IP.
+Verified working configurations (both produced live API keys):
+Camoufox headless + residential proxy + `geoip=True` + humanised typing, and CloakBrowser
+headless + the same proxy. Turnstile pass rate on Camoufox is roughly one in two attempts —
+the `ABFARM_ROTATE_CMD` hook rotates the exit between retries so a burned IP doesn't waste
+the run. Direct connections from datacenter IPs worked early on but degrade fast; use a
+residential exit.
 
 ## Failure modes
 
